@@ -28,6 +28,48 @@ LEFT JOIN (
 ) ASUM ON O.id = ASUM.id_orden
 ORDER BY total_factura DESC;
 
+
+
+/*----------Función AVG (average)---------------*/
+/* Calculando el promedio del precio de los menús disponibles:*/
 select
     avg(precio) as Promedio_Precio_Menus
 from MENUS;
+
+/* Calculando el promedio del salario de los empleados que trabajen como meseros:*/
+select 
+    avg(salario) as Salario_Mensual_Meseros
+from EMPLEADOS where cargo='Mesero'
+
+/*Calculando el promedio del salario de los empleados agrupando por cargo:*/
+select 
+    cargo,
+    avg(salario) as Promedio_Salario
+from EMPLEADOS
+group by cargo;
+
+/*----------Función MAX y MIN---------------*/
+/*---Seleccionando el producto más barato de los menús disponibles---*/
+select nombre, precio
+from MENUS
+WHERE precio = (select MIN(precio) from MENUS);
+
+/*---Seleccionando el producto más barato de los menús disponibles---*/
+select nombre, precio
+from MENUS
+WHERE precio = (select MAX(precio) from MENUS);
+
+/*Mostrando el empleado con el mayor sueldo*/
+select nombre, apellido, cargo, salario
+from EMPLEADOS
+WHERE salario = (select MAX(salario) from EMPLEADOS);
+
+/*Mostrando el empleado con el menor sueldo*/
+select nombre, apellido, cargo, salario
+from EMPLEADOS
+WHERE salario = (select MIN(salario) from EMPLEADOS);
+
+/*Mostrando el cajero que tiene el mayor sueldp*/
+select nombre, apellido, salario
+from EMPLEADOS
+WHERE cargo = 'Mesero' and salario = (select MAX(salario) from EMPLEADOS)
