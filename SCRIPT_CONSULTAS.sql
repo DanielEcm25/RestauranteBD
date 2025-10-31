@@ -36,6 +36,11 @@ select
     avg(precio) as Promedio_Precio_Menus
 from MENUS;
 
+/*Mostrando los menús con un precio mayor al promedio general*/
+select nombre, precio
+from MENUS
+where precio > (select avg(precio) from MENUS);
+
 /* Calculando el promedio del salario de los empleados que trabajen como meseros:*/
 select 
     avg(salario) as Salario_Mensual_Meseros
@@ -59,17 +64,40 @@ select nombre, precio
 from MENUS
 WHERE precio = (select MAX(precio) from MENUS);
 
-/*Mostrando el empleado con el mayor sueldo*/
+/* Mostrando el empleado con el mayor sueldo:*/
 select nombre, apellido, cargo, salario
 from EMPLEADOS
 WHERE salario = (select MAX(salario) from EMPLEADOS);
 
-/*Mostrando el empleado con el menor sueldo*/
+/* Mostrando el empleado con el menor sueldo:*/
 select nombre, apellido, cargo, salario
 from EMPLEADOS
 WHERE salario = (select MIN(salario) from EMPLEADOS);
 
-/*Mostrando el cajero que tiene el mayor sueldp*/
-select nombre, apellido, salario
+/* Mostrando el cajero que tiene el mayor sueldo:*/
+select nombre, apellido, cargo, salario
 from EMPLEADOS
-WHERE cargo = 'Mesero' and salario = (select MAX(salario) from EMPLEADOS)
+WHERE cargo = 'Mesero' and salario = (select MAX(salario) from EMPLEADOS where cargo = 'Mesero');
+
+/*-------------Función HAVING-----------------*/
+
+/* Mostrando los cargos que en promedio tienen salario superior al promedio general:*/
+select cargo, AVG(salario) AS SalarioPromedio
+from EMPLEADOS
+group by cargo
+HAVING AVG(salario) > (select AVG(salario) from EMPLEADOS);
+
+/*Mostrando los cargos que en promedio tienen salario menor al promedio general:*/
+select cargo, AVG(salario) AS SalarioPromedio
+from EMPLEADOS
+group by cargo
+HAVING AVG(salario) < (select AVG(salario) from EMPLEADOS);
+
+
+/* Consultas complejas*/
+/*Mostrando los empleados que tienen más de una orden registrada:*/
+select E.nombre as Nombre, E.apellido as Apellido,COUNT(O.id) AS total_ordenes
+from EMPLEADOS E
+JOIN ORDENES O ON E.nit = O.nit_empleado
+group by E.nombre, E.apellido
+HAVING COUNT(O.id) > 1;
