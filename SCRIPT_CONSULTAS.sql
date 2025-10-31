@@ -12,7 +12,7 @@ FROM ORDENES O
 INNER JOIN CLIENTES C ON O.nit_cliente = C.nit
 INNER JOIN EMPLEADOS E ON O.nit_empleado = E.nit
 LEFT JOIN (
-    -- suma de precios de los menus/paltos principales por orden
+    -- suma de precios de los menus/platos principales por orden
     SELECT DO.id_orden, SUM(M.precio) AS suma_menus
     FROM DETALLE_ORDEN DO
     INNER JOIN MENUS M ON DO.id_menu = M.id_menu
@@ -27,3 +27,7 @@ LEFT JOIN (
     GROUP BY DO.id_orden
 ) ASUM ON O.id = ASUM.id_orden
 ORDER BY total_factura DESC;
+
+select
+    avg(precio) as Promedio_Precio_Menus
+from MENUS;
