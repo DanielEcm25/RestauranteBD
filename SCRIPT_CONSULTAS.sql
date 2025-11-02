@@ -31,65 +31,52 @@ ORDER BY total_factura DESC;
 ----------------------------------------------
 --|         SELECT con condiciones         |--
 ----------------------------------------------
--- 1) Órdenes atendidas por un empleado en un rango de fechas
-SELECT
-  O.id AS id_orden,
-  O.fecha,
-  O.hora,
-  C.nit AS nit_cliente,
-  C.nombre + ' ' + C.apellido AS cliente,
-  E.nit AS nit_empleado,
-  E.nombre + ' ' + E.apellido AS empleado,
-  O.id_mesa
-FROM ORDENES O
-JOIN CLIENTES C ON O.nit_cliente = C.nit
-JOIN EMPLEADOS E ON O.nit_empleado = E.nit
-WHERE E.nit = '1765432189'                 
-  AND O.fecha BETWEEN '2025-10-25' AND GETDATE()
-ORDER BY O.fecha DESC, O.hora DESC;
+-- 1) Menús con precio mayor a 25.000
+select nombre, precio
+from MENUS
+WHERE precio > 25000;
 
 -- 2) Menus entre 17000 y 50000 y que tienen pollo
-SELECT id_menu, nombre, precio, descripcion
-FROM MENUS
+select id_menu, nombre, precio, descripcion
+from MENUS
 WHERE precio BETWEEN 18000 AND 30000
   AND nombre LIKE '%Pollo%'  -- en esta parte se usa LIKE para buscar palabras en nombre
-ORDER BY precio;
+order by precio;
 
 -- 3) Los 3 empleados con mayor salario
-SELECT TOP 3 nit, nombre + ' ' + apellido AS empleado, cargo, salario
-FROM EMPLEADOS
+select top 3 nit, nombre + ' ' + apellido AS empleado, cargo, salario
+from EMPLEADOS
 WHERE salario > 0
-ORDER BY salario DESC;
+order by salario DESC;
 
 ----------------------------------------------
 --|     Funcion de agregación Count        |--
 ----------------------------------------------
+-- 1) Contar el número total de clientes registrados
+select 
+COUNT(*) AS total_clientes
+from CLIENTES;
 
--- 1) Número de órdenes por cliente
-SELECT C.nit, C.nombre + ' ' + C.apellido AS cliente, COUNT(O.id) AS total_ordenes
-FROM CLIENTES C
+-- 2) Contar el número total de empleados registrados
+select 
+COUNT(*) AS total_empleados
+from EMPLEADOS;
+
+-- 3) Número de órdenes por cliente
+select C.nit, C.nombre + ' ' + C.apellido AS cliente, 
+COUNT(O.id) AS total_ordenes
+from CLIENTES C
 LEFT JOIN ORDENES O ON O.nit_cliente = C.nit
-GROUP BY C.nit, C.nombre, C.apellido
-ORDER BY total_ordenes DESC;
+group by C.nit, C.nombre, C.apellido
+order by total_ordenes DESC;
 
---- 2) Platos adicionales más solicitados
-SELECT 
-    P.id AS id_plato,
-    P.nombre AS nombre_plato,
-    COUNT(DOA.id) AS veces_pedidas
-FROM PLATOS AS P
-INNER JOIN DETALLE_ORDEN_ADICIONAL AS DOA 
-    ON P.id = DOA.id_plato
-GROUP BY P.id, P.nombre
-HAVING COUNT(DOA.id) > 1
-ORDER BY veces_pedidas DESC;
-
--- 3)Número de órdenes por empleado
-SELECT E.nit,E.nombre + ' ' + E.apellido AS empleado, COUNT(O.id) AS total_ordenes
-FROM EMPLEADOS E
+-- 4)Número de órdenes por empleado
+select E.nit,E.nombre + ' ' + E.apellido AS empleado,
+COUNT(O.id) AS total_ordenes
+from EMPLEADOS E
 LEFT JOIN ORDENES O ON E.nit = O.nit_empleado
-GROUP BY E.nit, E.nombre, E.apellido
-ORDER BY total_ordenes DESC;
+group by E.nit, E.nombre, E.apellido
+order by total_ordenes DESC;
 
 /*----------Función AVG (average)---------------*/
 /* Calculando el promedio del precio de los menús disponibles:*/
@@ -167,6 +154,7 @@ HAVING COUNT(O.id) > 1;
 ----------------------------------------------
 --|              STRING_AGG                |--
 ----------------------------------------------
+<<<<<<< HEAD
 -- 1) Menús pedidos por cada orden 
 SELECT
   O.id AS id_orden,
@@ -224,3 +212,32 @@ LEFT JOIN (
 ) AS AA ON O.id = AA.id_orden
 
 WHERE O.id = 1;
+=======
+-- 1) Empleados agrupados por cargo
+select 
+    cargo,
+    STRING_AGG(nombre + ' ' + apellido, ', ') AS empleados
+from EMPLEADOS
+group by cargo
+order by cargo;
+
+-- 2) Clientes agrupados por la primera letra del nombre
+select 
+    LEFT(nombre, 1) AS inicial,
+    STRING_AGG(nombre + ' ' + apellido, ', ') AS clientes
+from CLIENTES
+group by LEFT(nombre, 1)
+order by inicial;
+
+-- 3) Lista todos los correos electrónicos de los 
+select 
+    cargo,
+    STRING_AGG(correo, ', ') AS correos_empleados
+from EMPLEADOS
+group by cargo
+order by cargo;
+
+
+
+
+>>>>>>> bd10ce33303beb3cf4dec7b672619f80300b09b0
