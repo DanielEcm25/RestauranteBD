@@ -179,3 +179,48 @@ JOIN DETALLE_ORDEN D ON O.id = D.id_orden
 JOIN MENUS M ON D.id_menu = M.id_menu
 GROUP BY O.id, C.nit, C.nombre, C.apellido
 ORDER BY O.id;
+
+/*---Consulta factura para la orden 1:-------*/
+
+SELECT
+    O.id AS id_orden,
+    C.nit AS nit_cliente,
+    C.nombre + ' ' + C.apellido AS cliente,
+    E.nit AS nit_empleado,
+    E.nombre + ' ' + E.apellido AS empleado,
+    -- Menús principales
+    COALESCE(MA.menus, 'Sin menús') AS menus_pedidos,
+    COALESCE(MA.total_menus, 0) AS total_menus,
+    -- Platos adicionales
+    COALESCE(AA.adicionales, 'Sin adicionales') AS adicionales_pedidos,
+    COALESCE(AA.total_adicionales, 0) AS total_adicionales,
+    -- Total final
+    COALESCE(MA.total_menus, 0) + COALESCE(AA.total_adicionales, 0) AS total_factura
+FROM ORDENES O
+INNER JOIN CLIENTES C ON O.nit_cliente = C.nit
+INNER JOIN EMPLEADOS E ON O.nit_empleado = E.nit
+
+-- Subconsulta 1: menús principales
+LEFT JOIN (
+    SELECT
+        DO.id_orden,
+        STRING_AGG(M.nombre + ' ($' + CAST(M.precio AS VARCHAR(10)) + ')', ', ') AS menus,
+        SUM(M.precio) AS total_menus
+    FROM DETALLE_ORDEN DO
+    INNER JOIN MENUS M ON DO.id_menu = M.id_menu
+    GROUP BY DO.id_orden
+) AS MA ON O.id = MA.id_orden
+
+-- Subconsulta 2: platos adicionales
+LEFT JOIN (
+    SELECT
+        DO.id_orden,
+        STRING_AGG(P.nombre + ' ($' + CAST(P.precio AS VARCHAR(10)) + ')', ', ') AS adicionales,
+        SUM(P.precio) AS total_adicionales
+    FROM DETALLE_ORDEN DO
+    INNER JOIN DETALLE_ORDEN_ADICIONAL DOA ON DO.id_detalle = DOA.id_detalle_orden
+    INNER JOIN PLATOS P ON DOA.id_plato = P.id
+    GROUP BY DO.id_orden
+) AS AA ON O.id = AA.id_orden
+
+WHERE O.id = 1;
